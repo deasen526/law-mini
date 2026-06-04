@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(node *)",
+      "Bash(curl *)",
+      "Bash(mkdir *)",
+      "Bash(ls *)",
+      "Bash(cat *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "command": "echo '📝 [质量提醒] 已修改文件，请自查: .claude/rules/quality-gate.md'"
+      },
+      {
+        "matcher": "Write",
+        "command": "echo '📄 [质量提醒] 已创建新文件，请自查: .claude/rules/quality-gate.md'"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "always",
+        "command": "echo '🛑 任务结束前请确认: 1)已自测 2)已commit 3)CLAUDE.md是否需要更新'"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash(npm install *)",
+        "command": "echo '⚠️  检测到 npm install，请确认该依赖是否必要。如需安装，先更新 CLAUDE.md 说明原因。'"
+      }
+    ]
+  }
+}
