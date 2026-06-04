@@ -106,3 +106,29 @@ id, name, icon(emoji), sortOrder, isActive
 - API 返回格式：`{ code: 0, data: ... }` 或 `{ code: 非0, msg: '错误信息' }`
 - 金额单位：**分**（整数），前端显示时 `/100`
 - 所有时间用 ISO 字符串存储在 JSON 中
+
+## 已知工具函数（不要重复造轮子）
+
+| 位置 | 函数 | 用途 |
+|------|------|------|
+| `server/utils/orderNo.js` | `generateOrderNo()` | 生成 LS 前缀订单号 |
+| `server/utils/wechatPay.js` | `jsapiPay()` | 微信支付 JSAPI 下单 |
+| `server/utils/wechatPay.js` | `verifyNotifySign()` | 验签支付回调 |
+| `server/utils/wechatPay.js` | `decryptNotify()` | 解密回调数据 |
+| `server/utils/generateIcons.js` | — | 生成 tabBar 占位图标 |
+| `server/models/store.js` | `Store` 类 | JSON 数据库（CRUD/sum/count/findAll） |
+| `server/models/store.js` | `getStore(name)` | 获取/创建 Store 实例 |
+| `miniprogram/api/index.js` | `request()` | 小程序端通用 HTTP 请求 |
+| `miniprogram/api/index.js` | `getProducts/detail/createOrder/...` | 各 API 封装函数 |
+| `miniprogram/store/index.js` | `useUserStore` | 用户登录状态 Pinia store |
+| `miniprogram/store/index.js` | `useCartStore` | 当前选购产品 Pinia store |
+
+## 不引入新依赖
+
+项目原则：**零外部依赖**，只用 Node.js 内置模块 + 已在 package.json 中的包。
+如果遇到需要新包才能解决的问题 → 用原生实现。
+
+## 质量控制
+
+修改代码后，自动遵守 `.claude/rules/quality-gate.md` 中的 7 条自查清单。
+不了解项目风格时，参考 `.claude/rules/task-templates.md` 中的任务模板。
