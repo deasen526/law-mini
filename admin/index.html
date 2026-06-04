@@ -135,10 +135,16 @@
       border-radius: 12px;
       padding: 32px;
       width: 520px;
-      max-height: 80vh;
+      max-height: 85vh;
       overflow-y: auto;
     }
+    .modal-wide { width: 680px; }
     .modal h3 { margin-bottom: 20px; font-size: 18px; }
+    .form-row { display: flex; gap: 16px; }
+    .flex-1 { flex: 1; }
+    .flex-2 { flex: 2; }
+    .form-divider { border: none; border-top: 1px solid #eee; margin: 20px 0; }
+    .form-hint { font-size: 12px; color: #aaa; margin-top: 4px; }
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 500; }
     .form-group input, .form-group textarea, .form-group select {
@@ -152,6 +158,24 @@
     .form-group textarea { min-height: 80px; resize: vertical; font-family: inherit; }
     .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
     .btn-cancel { background: #f5f5f5; color: #666; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4caf50;
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #f44336; }
 
     .section { display: none; }
     .section.active { display: block; }
@@ -298,52 +322,92 @@
 
   <!-- 产品编辑弹窗 -->
   <div class="modal-overlay" id="product-modal">
-    <div class="modal">
+    <div class="modal modal-wide">
       <h3 id="product-modal-title">新增产品</h3>
       <form id="product-form">
         <input type="hidden" id="prod-id">
-        <div class="form-group">
-          <label>产品名称 *</label>
-          <input type="text" id="prod-name" required>
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label>产品名称 *</label>
+            <input type="text" id="prod-name" required>
+          </div>
+          <div class="form-group flex-1">
+            <label>分类 *</label>
+            <select id="prod-category" required></select>
+          </div>
         </div>
+
         <div class="form-group">
-          <label>副标题</label>
-          <input type="text" id="prod-subtitle">
+          <label>副标题 / 一句话卖点</label>
+          <input type="text" id="prod-subtitle" placeholder="例如：被欠薪/被辞退/没签合同？我们一步步带你走完仲裁">
         </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>售价(元) *</label>
+            <input type="number" id="prod-price" step="0.01" required>
+          </div>
+          <div class="form-group flex-1">
+            <label>原价(元) / 划线价</label>
+            <input type="number" id="prod-original-price" step="0.01">
+          </div>
+          <div class="form-group flex-1">
+            <label>排序数字</label>
+            <input type="number" id="prod-sort" value="0">
+          </div>
+        </div>
+
         <div class="form-group">
-          <label>分类 *</label>
-          <select id="prod-category" required></select>
+          <label>🎯 场景描述（用户痛点，显示在产品页顶部）</label>
+          <textarea id="prod-scenario" rows="3" placeholder="干了几个月被辞退，工资还没结清，公司态度强硬……"></textarea>
         </div>
+
         <div class="form-group">
-          <label>售价(元) *</label>
-          <input type="number" id="prod-price" step="0.01" required>
+          <label>💰 ROI提示（帮用户算账，绿色背景突出显示）</label>
+          <textarea id="prod-roi" rows="3" placeholder="你的案子大概值多少钱？花XX元能要回多少？"></textarea>
         </div>
+
+        <hr class="form-divider">
+
         <div class="form-group">
-          <label>原价(元)</label>
-          <input type="number" id="prod-original-price" step="0.01">
+          <label>✅ 服务内容（一行一个）</label>
+          <textarea id="prod-features" rows="5" placeholder="✅ 1对1案情分析，帮你梳理可主张的全部权益&#10;✅ 定制仲裁申请书（根据你案情写的，不是模板）&#10;✅ 证据收集清单 + 取证指导&#10;✅ 仲裁全流程分步指导&#10;✅ 开庭前电话模拟辅导&#10;✅ 结案前不终止服务"></textarea>
+          <div class="form-hint">每行一个服务项，以 ✅ 开头效果最好</div>
         </div>
+
         <div class="form-group">
-          <label>场景描述</label>
-          <textarea id="prod-scenario" placeholder="唤醒用户痛点"></textarea>
+          <label>🔄 服务流程（每行：步骤名 | 描述）</label>
+          <textarea id="prod-process" rows="4" placeholder="提交案情 | 你通过小程序填写基本情况&#10;案情分析 | 24小时内法律顾问分析你的案件&#10;定制文书 | 我们帮你起草仲裁申请书和证据清单&#10;立案指导 | 告诉你去哪里立案、带什么材料&#10;开庭辅导 | 开庭前电话模拟&#10;全程跟进 | 每一步都有人问，直到拿到裁决书"></textarea>
+          <div class="form-hint">格式：步骤名称 | 步骤描述。每行一个步骤。</div>
         </div>
+
         <div class="form-group">
-          <label>ROI提示</label>
-          <textarea id="prod-roi" placeholder="帮用户算账"></textarea>
+          <label>🏆 真实案例（每行：标题 | 描述 | 结果）</label>
+          <textarea id="prod-cases" rows="3" placeholder="95后女生小陈 | 入职8个月没签合同被辞退，我们帮她梳理权益全程指导 | 拿回28,000元&#10;程序员小张 | 公司拖欠3个月工资后裁员 | 拿回36,000元"></textarea>
+          <div class="form-hint">格式：标题 | 描述 | 结果。每行一个案例。没有案例留空即可。</div>
         </div>
+
+        <hr class="form-divider">
+
         <div class="form-group">
-          <label>排序</label>
-          <input type="number" id="prod-sort" value="0">
+          <label>🛡️ 保障承诺</label>
+          <input type="text" id="prod-guarantee" placeholder="例如：如果仲裁委不受理你的案子，我们全额退款。">
         </div>
-        <div class="form-group">
-          <label>上架</label>
-          <select id="prod-active">
-            <option value="1">是</option>
-            <option value="0">否</option>
-          </select>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>上架状态</label>
+            <select id="prod-active">
+              <option value="1">✅ 上架（用户可见）</option>
+              <option value="0">❌ 下架（隐藏）</option>
+            </select>
+          </div>
         </div>
+
         <div class="form-actions">
           <button type="button" class="btn btn-cancel" onclick="closeProductModal()">取消</button>
-          <button type="submit" class="btn btn-primary">保存</button>
+          <button type="submit" class="btn btn-primary">💾 保存产品</button>
         </div>
       </form>
     </div>

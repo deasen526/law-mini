@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(node *)",
+      "Bash(curl *)",
+      "Bash(mkdir *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "command": "echo '📝 文件已修改: ${CLAUDE_TOOL_PARAM_FILE_PATH}'"
+      },
+      {
+        "matcher": "Write",
+        "command": "echo '📄 文件已创建: ${CLAUDE_TOOL_PARAM_FILE_PATH}'"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "always",
+        "command": "echo '✅ 任务完成。如有架构变更，请手动更新 CLAUDE.md 的相关段落。'"
+      }
+    ]
+  }
+}

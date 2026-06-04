@@ -35,25 +35,24 @@ exports.wxLogin = async (req, res) => {
     }
 
     // 查找或创建用户
-    const [user] = await User.findOrCreate({
-      where: { openid },
-      defaults: {
+    let user = User.findOne({ openid });
+
+    if (!user) {
+      user = User.create({
         openid,
         unionid: unionid || null,
         nickname: nickname || null,
         avatarUrl: avatarUrl || null,
-      },
-    });
+      });
+    } else {
+      // 更新用户信息
+      const updates = {};
+      if (nickname) updates.nickname = nickname;
+      if (avatarUrl) updates.avatarUrl = avatarUrl;
+      if (unionid && !user.unionid) updates.unionid = unionid;
 
-    // 如果用户已存在，更新昵称和头像
-    if (nickname || avatarUrl) {
-      const updateData = {};
-      if (nickname) updateData.nickname = nickname;
-      if (avatarUrl) updateData.avatarUrl = avatarUrl;
-      if (unionid && !user.unionid) updateData.unionid = unionid;
-
-      if (Object.keys(updateData).length > 0) {
-        await user.update(updateData);
+      if (Object.keys(updates).length > 0) {
+        user = User.update(user.id, updates);
       }
     }
 

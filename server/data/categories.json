@@ -1,0 +1,46 @@
+[
+  {
+    "name": "劳动维权",
+    "icon": "⚖️",
+    "sortOrder": 1,
+    "isActive": true,
+    "id": 1,
+    "createdAt": "2026-06-04T21:13:02.397Z",
+    "updatedAt": "2026-06-04T21:13:02.399Z"
+  },
+  {
+    "name": "租房纠纷",
+    "icon": "🏠",
+    "sortOrder": 2,
+    "isActive": true,
+    "id": 2,
+    "createdAt": "2026-06-04T21:13:02.399Z",
+    "updatedAt": "2026-06-04T21:13:02.399Z"
+  },
+  {
+    "name": "法律文书",
+    "icon": "📄",
+    "sortOrder": 3,
+    "isActive": true,
+    "id": 3,
+    "createdAt": "2026-06-04T21:13:02.399Z",
+    "updatedAt": "2026-06-04T21:13:02.399Z"
+  },
+  {
+    "name": "年度服务",
+    "icon": "⭐",
+    "sortOrder": 4,
+    "isActive": true,
+    "id": 4,
+    "createdAt": "2026-06-04T21:13:02.399Z",
+    "updatedAt": "2026-06-04T21:13:02.399Z"
+  },
+  {
+    "name": "刑事",
+    "icon": "？",
+    "sortOrder": 5,
+    "id": 5,
+    "createdAt": "2026-06-04T21:21:17.182Z",
+    "updatedAt": "2026-06-04T21:21:31.065Z"
+  }
+]

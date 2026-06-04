@@ -12,18 +12,15 @@ exports.createOrder = async (req, res) => {
     const { productId, quantity = 1, contactName, contactPhone, remark } = req.body;
 
     // 查找产品
-    const product = await Product.findOne({
-      where: { id: productId, isActive: true },
-    });
-
-    if (!product) {
+    const product = Product.findById(parseInt(productId));
+    if (!product || !product.isActive) {
       return res.status(404).json({ code: 404, msg: '产品不存在或已下架' });
     }
 
     const amount = product.price * quantity;
     const orderNo = generateOrderNo();
 
-    const order = await Order.create({
+    const order = Order.create({
       orderNo,
       userId: req.user.id,
       productId: product.id,
@@ -61,9 +58,7 @@ exports.payOrder = async (req, res) => {
       return res.status(401).json({ code: 401, msg: '请先登录' });
     }
 
-    const order = await Order.findOne({
-      where: { id: req.params.id, userId: req.user.id },
-    });
+    const order = Order.findOne({ id: parseInt(req.params.id), userId: req.user.id });
 
     if (!order) {
       return res.status(404).json({ code: 404, msg: '订单不存在' });
@@ -103,7 +98,6 @@ exports.payNotify = async (req, res) => {
     const timestamp = headers['wechatpay-timestamp'];
     const nonce = headers['wechatpay-nonce'];
     const signature = headers['wechatpay-signature'];
-    const serial = headers['wechatpay-serial'];
 
     const bodyStr = JSON.stringify(body);
     const isValid = verifyNotifySign(timestamp, nonce, bodyStr, signature);
@@ -125,16 +119,15 @@ exports.payNotify = async (req, res) => {
     const transactionId = decrypted.transaction_id;
 
     // 更新订单状态
-    const order = await Order.findOne({ where: { orderNo } });
+    const order = Order.findOne({ orderNo });
     if (order && order.status === 'pending') {
-      await order.update({
+      Order.update(order.id, {
         status: 'paid',
         wxTransactionId: transactionId,
-        paidAt: new Date(),
+        paidAt: new Date().toISOString(),
       });
     }
 
-    // 返回成功给微信
     res.status(200).json({ code: 'SUCCESS', message: '成功' });
   } catch (err) {
     console.error('支付回调处理失败:', err);
@@ -149,30 +142,34 @@ exports.getMyOrders = async (req, res) => {
       return res.status(401).json({ code: 401, msg: '请先登录' });
     }
 
-    const { page = 1, pageSize = 10 } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(pageSize);
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
 
-    const { rows, count } = await Order.findAndCountAll({
+    const result = Order.findAll({
       where: { userId: req.user.id },
       order: [['createdAt', 'DESC']],
-      limit: parseInt(pageSize),
+      limit: pageSize,
       offset,
-      attributes: { exclude: ['wxTransactionId'] },
-      include: [{
-        model: Product,
-        as: 'product',
-        attributes: ['id', 'coverImage'],
-        required: false,
-      }],
+    });
+
+    // 关联产品封面图
+    const list = result.rows.map(order => {
+      const product = Product.findById(order.productId);
+      return {
+        ...order,
+        wxTransactionId: undefined, // 不暴露给前端
+        product: product ? { id: product.id, coverImage: product.coverImage } : null,
+      };
     });
 
     res.json({
       code: 0,
       data: {
-        list: rows,
-        total: count,
-        page: parseInt(page),
-        pageSize: parseInt(pageSize),
+        list,
+        total: result.count,
+        page,
+        pageSize,
       },
     });
   } catch (err) {
@@ -188,21 +185,28 @@ exports.getOrderDetail = async (req, res) => {
       return res.status(401).json({ code: 401, msg: '请先登录' });
     }
 
-    const order = await Order.findOne({
-      where: { id: req.params.id, userId: req.user.id },
-      include: [{
-        model: Product,
-        as: 'product',
-        attributes: ['id', 'name', 'coverImage', 'features', 'process'],
-        required: false,
-      }],
+    const order = Order.findOne({
+      id: parseInt(req.params.id),
+      userId: req.user.id,
     });
 
     if (!order) {
       return res.status(404).json({ code: 404, msg: '订单不存在' });
     }
 
-    res.json({ code: 0, data: order });
+    const product = Product.findById(order.productId);
+    const result = {
+      ...order,
+      product: product ? {
+        id: product.id,
+        name: product.name,
+        coverImage: product.coverImage,
+        features: product.features,
+        process: product.process,
+      } : null,
+    };
+
+    res.json({ code: 0, data: result });
   } catch (err) {
     console.error('获取订单详情失败:', err);
     res.status(500).json({ code: 500, msg: '服务器错误' });

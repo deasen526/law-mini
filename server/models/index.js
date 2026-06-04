@@ -1,34 +1,23 @@
-const { Sequelize } = require('sequelize');
-const config = require('../config');
+/**
+ * 数据层入口
+ * 使用纯 JSON 文件存储（零依赖，无需安装数据库）
+ */
+const { getStore, Op } = require('./store');
 
-const sequelize = new Sequelize(config.db);
-
-// 导入模型定义
-const defineUser = require('./User');
-const defineCategory = require('./Category');
-const defineProduct = require('./Product');
-const defineOrder = require('./Order');
-
-// 定义模型
-const User = defineUser(sequelize);
-const Category = defineCategory(sequelize);
-const Product = defineProduct(sequelize);
-const Order = defineOrder(sequelize);
-
-// 模型关联
-Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' });
-Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
-
-User.hasMany(Order, { foreignKey: 'userId', as: 'orders' });
-Order.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-
-Product.hasMany(Order, { foreignKey: 'productId', as: 'orders' });
-Order.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+// 导出 Store 实例（兼容旧 Sequelize 接口）
+const User = getStore('users');
+const Category = getStore('categories');
+const Product = getStore('products');
+const Order = getStore('orders');
 
 module.exports = {
-  sequelize,
   User,
   Category,
   Product,
   Order,
+  Op,
+  // sequelize 占位（兼容旧代码）
+  sequelize: {
+    sync: async () => true,
+  },
 };

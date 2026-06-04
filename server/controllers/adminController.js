@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
-const { Product, Category, Order, User, sequelize } = require('../models');
-const { Op } = require('sequelize');
+const { Product, Category, Order, User, Op } = require('../models');
 
 // ========== 登录 ==========
 exports.login = async (req, res) => {
@@ -27,34 +26,31 @@ exports.login = async (req, res) => {
 // ========== 数据看板 ==========
 exports.dashboard = async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    const [
-      totalOrders,
-      todayOrders,
-      totalRevenue,
-      todayRevenue,
-      totalUsers,
-      todayUsers,
-    ] = await Promise.all([
-      Order.count(),
-      Order.count({ where: { createdAt: { [Op.gte]: today } } }),
-      Order.sum('amount', { where: { status: { [Op.in]: ['paid', 'delivering', 'completed'] } } }),
-      Order.sum('amount', { where: { status: { [Op.in]: ['paid', 'delivering', 'completed'] }, createdAt: { [Op.gte]: today } } }),
-      User.count(),
-      User.count({ where: { createdAt: { [Op.gte]: today } } }),
-    ]);
+    const allOrders = Order.all();
+    const allUsers = User.all();
+
+    const totalOrders = allOrders.length;
+    const todayOrders = allOrders.filter(o => o.createdAt?.startsWith(today)).length;
+
+    const paidOrders = allOrders.filter(o =>
+      ['paid', 'delivering', 'completed'].includes(o.status)
+    );
+    const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+    const todayRevenue = paidOrders
+      .filter(o => o.createdAt?.startsWith(today))
+      .reduce((sum, o) => sum + (o.amount || 0), 0);
+
+    const totalUsers = allUsers.length;
+    const todayUsers = allUsers.filter(u => u.createdAt?.startsWith(today)).length;
 
     res.json({
       code: 0,
       data: {
-        totalOrders,
-        todayOrders,
-        totalRevenue: totalRevenue || 0,
-        todayRevenue: todayRevenue || 0,
-        totalUsers,
-        todayUsers,
+        totalOrders, todayOrders,
+        totalRevenue, todayRevenue,
+        totalUsers, todayUsers,
       },
     });
   } catch (err) {
@@ -66,17 +62,25 @@ exports.dashboard = async (req, res) => {
 // ========== 产品管理 ==========
 exports.getProducts = async (req, res) => {
   try {
-    const { page = 1, pageSize = 20 } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(pageSize);
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const offset = (page - 1) * pageSize;
 
-    const { rows, count } = await Product.findAndCountAll({
-      include: [{ model: Category, as: 'category', attributes: ['id', 'name'] }],
+    const result = Product.findAll({
       order: [['sortOrder', 'ASC']],
-      limit: parseInt(pageSize),
+      limit: pageSize,
       offset,
     });
 
-    res.json({ code: 0, data: { list: rows, total: count } });
+    const list = result.rows.map(p => {
+      const category = Category.findById(p.categoryId);
+      return {
+        ...p,
+        category: category ? { id: category.id, name: category.name } : null,
+      };
+    });
+
+    res.json({ code: 0, data: { list, total: result.count } });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '服务器错误' });
   }
@@ -84,7 +88,7 @@ exports.getProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body);
+    const product = Product.create(req.body);
     res.json({ code: 0, data: product });
   } catch (err) {
     console.error('创建产品失败:', err);
@@ -94,12 +98,12 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = Product.findById(parseInt(req.params.id));
     if (!product) {
       return res.status(404).json({ code: 404, msg: '产品不存在' });
     }
-    await product.update(req.body);
-    res.json({ code: 0, data: product });
+    const updated = Product.update(product.id, req.body);
+    res.json({ code: 0, data: updated });
   } catch (err) {
     console.error('更新产品失败:', err);
     res.status(500).json({ code: 500, msg: '服务器错误' });
@@ -108,12 +112,11 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = Product.findById(parseInt(req.params.id));
     if (!product) {
       return res.status(404).json({ code: 404, msg: '产品不存在' });
     }
-    // 软删除：下架
-    await product.update({ isActive: false });
+    Product.update(product.id, { isActive: false });
     res.json({ code: 0, msg: '已下架' });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '服务器错误' });
@@ -123,8 +126,8 @@ exports.deleteProduct = async (req, res) => {
 // ========== 分类管理 ==========
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.findAll({ order: [['sortOrder', 'ASC']] });
-    res.json({ code: 0, data: categories });
+    const result = Category.findAll({ order: [['sortOrder', 'ASC']] });
+    res.json({ code: 0, data: result.rows });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '服务器错误' });
   }
@@ -132,7 +135,7 @@ exports.getCategories = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
   try {
-    const category = await Category.create(req.body);
+    const category = Category.create(req.body);
     res.json({ code: 0, data: category });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '服务器错误' });
@@ -141,10 +144,10 @@ exports.createCategory = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
-    const category = await Category.findByPk(req.params.id);
+    const category = Category.findById(parseInt(req.params.id));
     if (!category) return res.status(404).json({ code: 404, msg: '分类不存在' });
-    await category.update(req.body);
-    res.json({ code: 0, data: category });
+    const updated = Category.update(category.id, req.body);
+    res.json({ code: 0, data: updated });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '服务器错误' });
   }
@@ -153,30 +156,47 @@ exports.updateCategory = async (req, res) => {
 // ========== 订单管理 ==========
 exports.getOrders = async (req, res) => {
   try {
-    const { page = 1, pageSize = 20, status, keyword } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const offset = (page - 1) * pageSize;
+    const { status, keyword } = req.query;
+
     const where = {};
     if (status) where.status = status;
-    if (keyword) {
-      where[Op.or] = [
-        { orderNo: { [Op.like]: `%${keyword}%` } },
-        { productName: { [Op.like]: `%${keyword}%` } },
-        { contactName: { [Op.like]: `%${keyword}%` } },
-        { contactPhone: { [Op.like]: `%${keyword}%` } },
-      ];
-    }
 
-    const offset = (parseInt(page) - 1) * parseInt(pageSize);
-    const { rows, count } = await Order.findAndCountAll({
-      where,
-      include: [
-        { model: User, as: 'user', attributes: ['id', 'nickname', 'phone'] },
-      ],
+    const result = Order.findAll({
       order: [['createdAt', 'DESC']],
-      limit: parseInt(pageSize),
+      limit: pageSize,
       offset,
     });
 
-    res.json({ code: 0, data: { list: rows, total: count } });
+    let list = result.rows;
+
+    // 手动筛选状态
+    if (status) {
+      list = list.filter(o => o.status === status);
+    }
+
+    // 关键词搜索
+    if (keyword) {
+      list = list.filter(o =>
+        (o.orderNo && o.orderNo.includes(keyword)) ||
+        (o.productName && o.productName.includes(keyword)) ||
+        (o.contactName && o.contactName.includes(keyword)) ||
+        (o.contactPhone && o.contactPhone.includes(keyword))
+      );
+    }
+
+    // 关联用户
+    list = list.map(o => {
+      const user = User.findById(o.userId);
+      return {
+        ...o,
+        user: user ? { id: user.id, nickname: user.nickname, phone: user.phone } : null,
+      };
+    });
+
+    res.json({ code: 0, data: { list, total: list.length } });
   } catch (err) {
     console.error('获取订单列表失败:', err);
     res.status(500).json({ code: 500, msg: '服务器错误' });
@@ -185,7 +205,7 @@ exports.getOrders = async (req, res) => {
 
 exports.updateOrderStatus = async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id);
+    const order = Order.findById(parseInt(req.params.id));
     if (!order) return res.status(404).json({ code: 404, msg: '订单不存在' });
 
     const { status } = req.body;
@@ -195,8 +215,8 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(400).json({ code: 400, msg: '无效的状态' });
     }
 
-    await order.update({ status });
-    res.json({ code: 0, data: order });
+    const updated = Order.update(order.id, { status });
+    res.json({ code: 0, data: updated });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '服务器错误' });
   }
@@ -205,17 +225,23 @@ exports.updateOrderStatus = async (req, res) => {
 // ========== 用户管理 ==========
 exports.getUsers = async (req, res) => {
   try {
-    const { page = 1, pageSize = 20 } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(pageSize);
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const offset = (page - 1) * pageSize;
 
-    const { rows, count } = await User.findAndCountAll({
+    const result = User.findAll({
       order: [['createdAt', 'DESC']],
-      limit: parseInt(pageSize),
+      limit: pageSize,
       offset,
-      attributes: { exclude: ['openid', 'unionid'] },
     });
 
-    res.json({ code: 0, data: { list: rows, total: count } });
+    // 脱敏
+    const list = result.rows.map(u => ({
+      id: u.id, nickname: u.nickname, phone: u.phone,
+      source: u.source, createdAt: u.createdAt,
+    }));
+
+    res.json({ code: 0, data: { list, total: result.count } });
   } catch (err) {
     res.status(500).json({ code: 500, msg: '服务器错误' });
   }
