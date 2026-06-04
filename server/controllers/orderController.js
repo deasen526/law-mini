@@ -99,7 +99,7 @@ exports.payNotify = async (req, res) => {
     const nonce = headers['wechatpay-nonce'];
     const signature = headers['wechatpay-signature'];
 
-    const bodyStr = JSON.stringify(body);
+    const bodyStr = req.rawBody || JSON.stringify(body);
     const isValid = verifyNotifySign(timestamp, nonce, bodyStr, signature);
 
     if (!isValid) {

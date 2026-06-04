@@ -21,8 +21,13 @@ module.exports = {
     appId: process.env.WX_APPID || '',
     appSecret: process.env.WX_APPSECRET || '',
     mchId: process.env.WX_MCHID || '',
+    // APIv3 密钥：32 字节，用于回调解密 + 请求签名
     apiV3Key: process.env.WX_API_V3_KEY || '',
-    notifyUrl: process.env.WX_NOTIFY_URL || '',
+    // 商户 API 私钥：PEM 格式 RSA 私钥，用于请求签名
+    mchPrivateKey: process.env.WX_MCH_PRIVATE_KEY || process.env.WX_API_V3_KEY || '',
+    // 商户证书序列号
     mchSerialNo: process.env.WX_MCH_SERIAL_NO || '',
+    // 支付回调 URL
+    notifyUrl: process.env.WX_NOTIFY_URL || '',
   },
 };

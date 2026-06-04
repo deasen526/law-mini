@@ -26,7 +26,9 @@ exports.login = async (req, res) => {
 // ========== 数据看板 ==========
 exports.dashboard = async (req, res) => {
   try {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    // 使用本地日期（UTC+8），避免 toISOString 的 UTC 偏差
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     const allOrders = Order.all();
     const allUsers = User.all();
@@ -158,21 +160,16 @@ exports.getOrders = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 20;
-    const offset = (page - 1) * pageSize;
     const { status, keyword } = req.query;
 
-    const where = {};
-    if (status) where.status = status;
-
-    const result = Order.findAll({
+    // 先取全部订单（JSON 文件数据量小，全量读取无性能问题）
+    const allResult = Order.findAll({
       order: [['createdAt', 'DESC']],
-      limit: pageSize,
-      offset,
     });
 
-    let list = result.rows;
+    let list = allResult.rows;
 
-    // 手动筛选状态
+    // 筛选状态
     if (status) {
       list = list.filter(o => o.status === status);
     }
@@ -187,6 +184,12 @@ exports.getOrders = async (req, res) => {
       );
     }
 
+    const total = list.length;
+
+    // 分页
+    const offset = (page - 1) * pageSize;
+    list = list.slice(offset, offset + pageSize);
+
     // 关联用户
     list = list.map(o => {
       const user = User.findById(o.userId);
@@ -196,7 +199,7 @@ exports.getOrders = async (req, res) => {
       };
     });
 
-    res.json({ code: 0, data: { list, total: list.length } });
+    res.json({ code: 0, data: { list, total } });
   } catch (err) {
     console.error('获取订单列表失败:', err);
     res.status(500).json({ code: 500, msg: '服务器错误' });
@@ -209,7 +212,7 @@ exports.updateOrderStatus = async (req, res) => {
     if (!order) return res.status(404).json({ code: 404, msg: '订单不存在' });
 
     const { status } = req.body;
-    const allowedStatus = ['delivering', 'completed', 'cancelled', 'refunded'];
+    const allowedStatus = ['paid', 'delivering', 'completed', 'cancelled', 'refunded'];
 
     if (!allowedStatus.includes(status)) {
       return res.status(400).json({ code: 400, msg: '无效的状态' });
