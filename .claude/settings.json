@@ -11,24 +11,32 @@
       "Bash(npm run *)",
       "Bash(node *)",
       "Bash(curl *)",
-      "Bash(mkdir *)"
+      "Bash(mkdir *)",
+      "Bash(ls *)",
+      "Bash(cat *)"
     ]
   },
   "hooks": {
     "PostToolUse": [
       {
         "matcher": "Edit",
-        "command": "echo '📝 文件已修改: ${CLAUDE_TOOL_PARAM_FILE_PATH}'"
+        "command": "echo '📝 [质量提醒] 已修改文件，请自查: .claude/rules/quality-gate.md'"
       },
       {
         "matcher": "Write",
-        "command": "echo '📄 文件已创建: ${CLAUDE_TOOL_PARAM_FILE_PATH}'"
+        "command": "echo '📄 [质量提醒] 已创建新文件，请自查: .claude/rules/quality-gate.md'"
       }
     ],
     "Stop": [
       {
         "matcher": "always",
-        "command": "echo '✅ 任务完成。如有架构变更，请手动更新 CLAUDE.md 的相关段落。'"
+        "command": "echo '🛑 任务结束前请确认: 1)已自测 2)已commit 3)CLAUDE.md是否需要更新'"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash(npm install *)",
+        "command": "echo '⚠️  检测到 npm install，项目禁止新增依赖！如确需安装，请先更新 CLAUDE.md 说明原因。'"
       }
     ]
   }
