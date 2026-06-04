@@ -1,0 +1,21 @@
+{
+    "name": "法律助手商城",
+    "appid": "__UNI__XXXXXX",
+    "versionName": "1.0.0",
+    "versionCode": "1",
+    "description": "法律咨询维权服务商城",
+    "transformPx": false,
+    "uniStatistics": { "enable": false },
+    "mp-weixin": {
+        "appid": "替换为你的小程序AppID",
+        "setting": {
+            "urlCheck": true,
+            "es6": true,
+            "postcss": true,
+            "minified": true
+        },
+        "optimization": {
+            "subPackages": true
+        }
+    }
+}

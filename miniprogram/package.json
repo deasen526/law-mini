@@ -1,0 +1,8 @@
+{
+  "name": "law-minishop",
+  "version": "1.0.0",
+  "description": "法律咨询小程序商城",
+  "dependencies": {
+    "pinia": "^2.1.7"
+  }
+}
