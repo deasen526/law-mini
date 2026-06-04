@@ -104,7 +104,7 @@ class Store {
       results = results.slice(0, limit);
     }
 
-    // 处理关联
+    // 处理关联（eager loading）
     if (include.length > 0) {
       results = results.map(item => {
         const obj = { ...item };
@@ -112,9 +112,11 @@ class Store {
           if (inc.as && inc.foreignKey) {
             const relatedStore = getStore(inc.modelName || inc.as);
             if (relatedStore) {
-              obj[inc.as] = relatedStore.findAll({
+              const related = relatedStore.findAll({
                 where: { [inc.foreignKey]: item.id }
               });
+              // findAll 返回 { rows, count }，取 rows 作为关联数据
+              obj[inc.as] = related.rows;
             }
           }
         }
@@ -173,21 +175,18 @@ class Store {
   _match(item, where) {
     if (!where || Object.keys(where).length === 0) return true;
 
-    // 处理 Op 风格条件
-
     for (const [key, value] of Object.entries(where)) {
-      // 嵌套条件 (如 '$category.id$')
-      if (key.includes('.')) {
-        continue; // 跳过嵌套，在 findAll 中处理
-      }
+      // 跳过关联嵌套条件（如 'category.id'），在 findAll 中另外处理
+      if (key.includes('.')) continue;
 
-      if (key === Op.gte) {
-        // 用于日期比较等，暂时简化处理
+      // 顶级 Op.or：{ $or: [cond1, cond2, ...] }
+      if (key === Op.or) {
+        if (!value.some(cond => this._match(item, cond))) return false;
         continue;
       }
 
+      // 操作符条件：{ fieldName: { $gte: value, $lte: value, ... } }
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        // Op 操作符
         for (const [op, opVal] of Object.entries(value)) {
           if (op === Op.gte) {
             if (new Date(item[key]) < new Date(opVal)) return false;
@@ -198,14 +197,12 @@ class Store {
             if (!String(item[key] || '').includes(pattern)) return false;
           } else if (op === Op.in) {
             if (!opVal.includes(item[key])) return false;
-          } else if (op === Op.or) {
-            const anyMatch = opVal.some(cond => this._match(item, cond));
-            if (!anyMatch) return false;
           } else if (op === Op.ne) {
             if (item[key] === opVal) return false;
           }
         }
       } else if (item[key] !== value) {
+        // 精确匹配
         return false;
       }
     }

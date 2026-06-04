@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
-const { Product, Category, Order, User, Op } = require('../models');
+const { Product, Category, Order, User } = require('../models');
 
 // ========== 登录 ==========
 exports.login = async (req, res) => {

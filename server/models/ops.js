@@ -1,11 +1,11 @@
-// 操作符常量（与 store.js 中一致）
+// 操作符常量（字符串形式，确保 Object.entries() 能正常遍历）
 module.exports = {
   Op: {
-    gte: Symbol('gte'),
-    lte: Symbol('lte'),
-    like: Symbol('like'),
-    in: Symbol('in'),
-    or: Symbol('or'),
-    ne: Symbol('ne'),
+    gte: '$gte',
+    lte: '$lte',
+    like: '$like',
+    in: '$in',
+    or: '$or',
+    ne: '$ne',
   },
 };

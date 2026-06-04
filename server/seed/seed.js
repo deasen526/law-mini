@@ -193,14 +193,9 @@ async function seed() {
 
     const prodCount = Product.all().length;
     if (prodCount === 0) {
-      // 获取实际分类 ID（JSON Store 中可能不是 1-4）
-      const cats = Category.all();
-      const productsWithCatId = products.map((p, i) => ({
-        ...p,
-        categoryId: cats[i < 3 ? 0 : i < 4 ? 1 : i < 5 ? 2 : 3]?.id || 1,
-      }));
-      Product.bulkCreate(productsWithCatId);
-      console.log(`✅ ${productsWithCatId.length} 个产品已创建`);
+      // 产品数据中的 categoryId (1-4) 与分类插入顺序一致，直接使用
+      Product.bulkCreate(products);
+      console.log(`✅ ${products.length} 个产品已创建`);
     } else {
       console.log('⏭️  产品已存在，跳过');
     }
