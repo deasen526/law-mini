@@ -6,17 +6,17 @@
       <view class="hero-sub">专业法律顾问，帮你理清每一步</view>
       <view class="hero-stats">
         <view class="stat-item">
-          <view class="stat-dot stat-dot-1">&#9679;</view>
+          <view class="stat-dot stat-dot-1">●</view>
           <view class="stat-num">12,000+</view>
           <view class="stat-label">已服务人数</view>
         </view>
         <view class="stat-item">
-          <view class="stat-dot stat-dot-2">&#9670;</view>
+          <view class="stat-dot stat-dot-2">◆</view>
           <view class="stat-num">8,500+</view>
           <view class="stat-label">累计案例</view>
         </view>
         <view class="stat-item">
-          <view class="stat-dot stat-dot-3">&#9733;</view>
+          <view class="stat-dot stat-dot-3">★</view>
           <view class="stat-num">96%</view>
           <view class="stat-label">用户好评</view>
         </view>
@@ -60,15 +60,15 @@
     <!-- 信任栏 -->
     <view class="trust-bar">
       <view class="trust-item">
-        <view class="trust-dot trust-dot-green">&#10003;</view>
+        <view class="trust-dot trust-dot-green">✓</view>
         <text class="trust-text">合作律所背书</text>
       </view>
       <view class="trust-item">
-        <view class="trust-dot trust-dot-orange">&#8635;</view>
+        <view class="trust-dot trust-dot-orange">↻</view>
         <text class="trust-text">不满意可退款</text>
       </view>
       <view class="trust-item">
-        <view class="trust-dot trust-dot-blue">&#9993;</view>
+        <view class="trust-dot trust-dot-blue">✉</view>
         <text class="trust-text">1对1专属服务</text>
       </view>
     </view>
@@ -84,16 +84,16 @@ export default {
   data: function () {
     return {
       categories: [
-        { id: 1, name: '劳动维权', icon: '&#9878;' },
-        { id: 2, name: '租房纠纷', icon: '&#8962;' },
-        { id: 3, name: '法律文书', icon: '&#182;' },
-        { id: 4, name: '年度服务', icon: '&#9733;' },
+        { id: 1, name: '劳动维权', icon: '⚖' },
+        { id: 2, name: '租房纠纷', icon: '⌂' },
+        { id: 3, name: '法律文书', icon: '¶' },
+        { id: 4, name: '年度服务', icon: '★' },
       ],
       hotProducts: [],
       banners: [
-        { bg: 'linear-gradient(135deg, #1a6fb5, #42a5f5)', emoji: '&#9878;', title: '劳动维权专场', desc: '专业律师陪跑仲裁全流程' },
-        { bg: 'linear-gradient(135deg, #4caf50, #81c784)', emoji: '&#9733;', title: '新用户福利', desc: '首次咨询立享专属优惠' },
-        { bg: 'linear-gradient(135deg, #7b1fa2, #ba68c8)', emoji: '&#128737;', title: '年度会员', desc: '99元/年，无限次法律咨询' },
+        { bg: 'linear-gradient(135deg, #1a6fb5, #42a5f5)', emoji: '⚖', title: '劳动维权专场', desc: '专业律师陪跑仲裁全流程' },
+        { bg: 'linear-gradient(135deg, #4caf50, #81c784)', emoji: '★', title: '新用户福利', desc: '首次咨询立享专属优惠' },
+        { bg: 'linear-gradient(135deg, #7b1fa2, #ba68c8)', emoji: '🛡', title: '年度会员', desc: '99元/年，无限次法律咨询' },
       ],
     };
   },

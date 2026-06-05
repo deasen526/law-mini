@@ -3,7 +3,7 @@
     <!-- 未登录 -->
     <view v-if="!isLogin" class="login-page">
       <view class="login-card">
-        <view class="login-avatar">&#9786;</view>
+        <view class="login-avatar">☺</view>
         <view class="login-title">登录后查看订单</view>
         <view class="login-desc">微信一键登录，安全便捷</view>
         <button class="btn-login" @click="doLogin">微信一键登录</button>
@@ -21,7 +21,7 @@
 
     <!-- 空状态 -->
     <view v-else-if="orders.length === 0" class="empty">
-      <view class="empty-graphic">&#128203;</view>
+      <view class="empty-graphic">📋</view>
       <text class="empty-text">还没有订单</text>
       <text class="empty-hint">选购服务后订单会出现在这里</text>
       <view class="empty-btn" @click="goShop">去选购</view>

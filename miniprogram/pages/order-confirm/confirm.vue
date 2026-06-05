@@ -19,11 +19,11 @@
     <view class="card form-card">
       <view class="form-title">联系信息（选填）</view>
       <view class="form-item">
-        <text class="label">&#128100; 姓名</text>
+        <text class="label">👤 姓名</text>
         <input class="input-field" v-model="contactName" placeholder="如何称呼您" maxlength="20" />
       </view>
       <view class="form-item">
-        <text class="label">&#128222; 手机号</text>
+        <text class="label">📞 手机号</text>
         <input class="input-field" v-model="contactPhone" type="number" placeholder="方便顾问联系您" maxlength="11" />
       </view>
     </view>
@@ -42,7 +42,7 @@
 
     <!-- 协议 -->
     <view class="agreement">
-      <text class="agree-check">&#10003;</text>
+      <text class="agree-check">✓</text>
       <text>下单即表示同意《服务协议》</text>
     </view>
 

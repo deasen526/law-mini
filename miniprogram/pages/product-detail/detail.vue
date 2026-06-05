@@ -16,7 +16,7 @@
           </text>
         </view>
         <!-- 客服入口 -->
-        <button class="btn-service" open-type="contact" session-from="product_detail">&#9993; 联系客服</button>
+        <button class="btn-service" open-type="contact" session-from="product_detail">✉ 联系客服</button>
       </view>
     </view>
 
@@ -34,7 +34,7 @@
     <view class="card" v-if="product.features && product.features.length">
       <view class="card-title accent-blue">服务内容</view>
       <view class="feature-item" v-for="(item, idx) in product.features" :key="idx">
-        <text class="feature-check">&#10003;</text>
+        <text class="feature-check">✓</text>
         <text>{{ item }}</text>
       </view>
     </view>
@@ -79,7 +79,7 @@
         <text class="bp-value">{{ (product.price/100).toFixed(0) }}</text>
       </view>
       <view class="bottom-actions">
-        <button class="btn-share" open-type="share">&#8661; 分享</button>
+        <button class="btn-share" open-type="share">⇕ 分享</button>
         <button class="btn-buy" @click="buyNow">立即获取</button>
       </view>
     </view>

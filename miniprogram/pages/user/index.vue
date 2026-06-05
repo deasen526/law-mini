@@ -3,7 +3,7 @@
     <!-- 头部 -->
     <view class="user-header">
       <image v-if="isLogin && avatarUrl" :src="avatarUrl" class="avatar" mode="aspectFill" />
-      <view v-else class="avatar-placeholder">&#9786;</view>
+      <view v-else class="avatar-placeholder">☺</view>
       <view class="user-info">
         <view class="nickname">{{ nickname }}</view>
         <view class="user-tip" v-if="!isLogin">点击登录，管理您的法律服务</view>
@@ -13,27 +13,27 @@
     <!-- 菜单 -->
     <view class="menu-list">
       <view class="menu-item" @click="goOrderList">
-        <text class="menu-icon icon-orders">&#9776;</text>
+        <text class="menu-icon icon-orders">☰</text>
         <text class="menu-text">我的订单</text>
-        <text class="menu-arrow">&#8250;</text>
+        <text class="menu-arrow">›</text>
       </view>
 
       <button class="menu-item menu-btn" open-type="contact" session-from="user_center">
-        <text class="menu-icon icon-service">&#9993;</text>
+        <text class="menu-icon icon-service">✉</text>
         <text class="menu-text">联系客服</text>
-        <text class="menu-arrow">&#8250;</text>
+        <text class="menu-arrow">›</text>
       </button>
 
       <view class="menu-item" @click="showFAQ">
-        <text class="menu-icon icon-faq">&#63;</text>
+        <text class="menu-icon icon-faq">?</text>
         <text class="menu-text">常见问题</text>
-        <text class="menu-arrow">&#8250;</text>
+        <text class="menu-arrow">›</text>
       </view>
 
       <view class="menu-item" @click="showAbout">
-        <text class="menu-icon icon-about">&#8505;</text>
+        <text class="menu-icon icon-about">ℹ</text>
         <text class="menu-text">关于我们</text>
-        <text class="menu-arrow">&#8250;</text>
+        <text class="menu-arrow">›</text>
       </view>
     </view>
 

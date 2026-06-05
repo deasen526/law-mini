@@ -34,7 +34,7 @@
 
     <!-- 空状态 -->
     <view v-else class="empty">
-      <view class="empty-graphic">&#128196;</view>
+      <view class="empty-graphic">📄</view>
       <text class="empty-text">该分类下暂无服务</text>
       <text class="empty-hint">敬请期待更多法律产品</text>
       <view class="empty-btn" @click="goHome">返回首页</view>
