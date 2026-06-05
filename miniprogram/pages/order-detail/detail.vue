@@ -1,5 +1,6 @@
 <template>
-  <view class="page" v-if="order">
+  <view>
+    <view class="page" v-if="order">
     <!-- 状态栏 -->
     <view class="status-bar" :class="'status-bg-' + order.status">
       <view class="status-text">{{ statusMap[order.status] }}</view>
@@ -38,6 +39,7 @@
   <view v-else class="loading-page">
     <view class="skeleton skeleton-bar"></view>
     <view class="skeleton skeleton-card" style="height:280rpx;"></view>
+  </view>
   </view>
 </template>
 

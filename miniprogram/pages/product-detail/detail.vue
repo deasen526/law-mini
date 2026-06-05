@@ -1,5 +1,6 @@
 <template>
-  <view class="page" v-if="product">
+  <view>
+    <view class="page" v-if="product">
     <!-- 头部 -->
     <view class="header">
       <view class="cover-placeholder" :style="{ background: categoryGradient }">
@@ -98,6 +99,7 @@
     <view class="skeleton skeleton-card"></view>
     <view class="skeleton skeleton-card"></view>
     <view class="skeleton skeleton-card"></view>
+  </view>
   </view>
 </template>
 

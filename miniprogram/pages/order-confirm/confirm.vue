@@ -1,5 +1,6 @@
 <template>
-  <view class="page" v-if="product">
+  <view>
+    <view class="page" v-if="product">
     <!-- 产品摘要 -->
     <view class="card product-summary">
       <view class="product-icon" :style="{ background: catGradient }">
@@ -62,6 +63,7 @@
     <view class="skeleton skeleton-card" style="height:100rpx; margin:20rpx;"></view>
     <view class="skeleton skeleton-card" style="height:200rpx; margin:20rpx;"></view>
     <view class="skeleton skeleton-card" style="height:120rpx; margin:20rpx;"></view>
+  </view>
   </view>
 </template>
 
