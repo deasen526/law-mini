@@ -9,7 +9,7 @@
     "mp-weixin": {
         "appid": "替换为你的小程序AppID",
         "setting": {
-            "urlCheck": true,
+            "urlCheck": false,
             "es6": true,
             "postcss": true,
             "minified": true

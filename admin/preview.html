@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>法律助手 - 小程序预览</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system,'PingFang SC','Microsoft YaHei',sans-serif;
+      background: #f5f5f5; color: #333; max-width: 420px; margin: 0 auto;
+      min-height: 100vh;
+    }
+    /* 状态栏模拟 */
+    .status-bar { background: #1a6fb5; color: #fff; padding: 12px 16px; font-size: 14px; text-align: center; }
+    /* 底部导航 */
+    .tabbar {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 420px; background: #fff; display: flex;
+      border-top: 1px solid #eee; z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+    }
+    .tabbar .tab {
+      flex: 1; text-align: center; padding: 8px 0; font-size: 11px; color: #999; cursor: pointer;
+    }
+    .tabbar .tab.active { color: #1a6fb5; }
+    .tabbar .tab .icon { font-size: 22px; display: block; margin-bottom: 2px; }
+    /* 内容区 */
+    .page-content { padding-bottom: 70px; display: none; }
+    .page-content.active { display: block; }
+    /* 首页 */
+    .hero { background: linear-gradient(160deg, #1a6fb5, #0d47a1); color: #fff; padding: 28px 20px 24px; }
+    .hero h2 { font-size: 22px; margin-bottom: 4px; }
+    .hero p { font-size: 14px; opacity: 0.9; }
+    .hero .stats { display: flex; justify-content: space-around; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2); }
+    .hero .stats .s { text-align: center; }
+    .hero .stats .s .n { font-size: 18px; font-weight: 700; }
+    .hero .stats .s .l { font-size: 11px; opacity: 0.8; }
+    .section-title { font-size: 16px; font-weight: 600; padding: 16px 16px 8px; }
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+    .cat-card { background: #fff; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+    .cat-card .ci { font-size: 36px; display: block; margin-bottom: 8px; }
+    .cat-card .cn { font-size: 14px; font-weight: 500; }
+    .product-card {
+      background: #fff; border-radius: 12px; margin: 10px 16px; display: flex; padding: 0;
+      overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.04); cursor: pointer;
+    }
+    .product-card .cover {
+      width: 100px; height: 100px; background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0;
+    }
+    .product-card .info { flex: 1; padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+    .product-card .info .pname { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .product-card .info .psub { font-size: 12px; color: #999; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .product-card .info .pprice { font-size: 20px; color: #f44336; font-weight: 700; }
+    .product-card .info .pprice span { font-size: 13px; }
+    .product-card .info .poriginal { font-size: 12px; color: #ccc; text-decoration: line-through; margin-left: 8px; }
+    /* 详情页 */
+    .detail-header { background: #fff; display: flex; padding: 20px 16px; }
+    .detail-header .dh-cover {
+      width: 100px; height: 100px; border-radius: 10px; background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0;
+    }
+    .detail-header .dh-info { flex: 1; margin-left: 16px; }
+    .detail-header .dh-info h3 { font-size: 17px; line-height: 1.3; }
+    .detail-header .dh-info .dh-sub { font-size: 13px; color: #999; margin-top: 6px; }
+    .detail-header .dh-info .dh-price { font-size: 28px; color: #f44336; font-weight: 700; margin-top: 10px; }
+    .card { background: #fff; border-radius: 12px; margin: 10px 16px; padding: 18px; }
+    .card h4 { font-size: 15px; margin-bottom: 12px; }
+    .scenario-text { font-size: 14px; color: #555; line-height: 1.7; }
+    .roi-card { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 12px; margin: 10px 16px; padding: 18px; font-size: 14px; color: #2e7d32; line-height: 1.7; }
+    .feature-item { font-size: 14px; color: #555; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+    .feature-item:last-child { border-bottom: none; }
+    .process-item { display: flex; margin-bottom: 16px; }
+    .process-item .step-num { width: 28px; height: 28px; background: #1a6fb5; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-right: 12px; }
+    .process-item .step-title { font-size: 14px; font-weight: 500; }
+    .process-item .step-desc { font-size: 12px; color: #999; margin-top: 2px; }
+    .case-item { padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+    .case-item:last-child { border-bottom: none; }
+    .case-item .case-title { font-size: 14px; font-weight: 500; }
+    .case-item .case-desc { font-size: 13px; color: #666; margin-top: 4px; line-height: 1.5; }
+    .case-item .case-result { font-size: 13px; color: #4caf50; font-weight: 600; margin-top: 6px; }
+    .guarantee-text { text-align: center; font-size: 14px; color: #ff9800; }
+    .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: #fff; padding: 12px 16px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; box-shadow: 0 -2px 12px rgba(0,0,0,0.06); z-index: 100; }
+    .bottom-bar .bprice { font-size: 22px; color: #f44336; font-weight: 700; }
+    .bottom-bar .bbtn { background: linear-gradient(135deg, #f44336, #e53935); color: #fff; padding: 12px 40px; border-radius: 24px; font-size: 15px; font-weight: 500; border: none; cursor: pointer; }
+    .back-btn { display: inline-block; padding: 8px 16px; color: #1a6fb5; font-size: 14px; cursor: pointer; margin-left: 10px; }
+    .empty-state { text-align: center; padding: 60px 0; color: #999; }
+  </style>
+</head>
+<body>
+  <div class="status-bar" id="statusBar">⚖️ 法律助手 — 小程序预览</div>
+
+  <!-- ===== 首页 ===== -->
+  <div class="page-content active" id="page-home">
+    <div class="hero">
+      <h2>遇到法律问题？</h2>
+      <p>专业法律顾问，帮你理清每一步</p>
+      <div class="stats">
+        <div class="s"><div class="n">12,000+</div><div class="l">已服务人数</div></div>
+        <div class="s"><div class="n">8,500+</div><div class="l">累计案例</div></div>
+        <div class="s"><div class="n">96%</div><div class="l">用户好评</div></div>
+      </div>
+    </div>
+
+    <div class="section-title">选择你的问题</div>
+    <div class="cat-grid" id="catGrid"></div>
+
+    <div class="section-title">热门服务</div>
+    <div id="hotProducts"></div>
+
+    <div style="display:flex;justify-content:space-around;background:#fff;border-radius:12px;margin:10px 16px;padding:16px;text-align:center;font-size:12px;color:#666;">
+      <div>🔒 合作律所背书</div>
+      <div>↩️ 不满意可退款</div>
+      <div>💬 1对1专属服务</div>
+    </div>
+  </div>
+
+  <!-- ===== 产品列表 ===== -->
+  <div class="page-content" id="page-products">
+    <div id="catTabs" style="display:flex;overflow-x:auto;background:#fff;padding:12px 16px;gap:8px;white-space:nowrap;"></div>
+    <div id="productList"></div>
+  </div>
+
+  <!-- ===== 产品详情 ===== -->
+  <div class="page-content" id="page-detail">
+    <div class="back-btn" onclick="goBack()">← 返回</div>
+    <div id="detailContent"></div>
+  </div>
+
+  <!-- ===== 底部导航 ===== -->
+  <div class="tabbar">
+    <div class="tab active" onclick="switchPage('home')">
+      <span class="icon">🏠</span>首页
+    </div>
+    <div class="tab" onclick="switchPage('products')">
+      <span class="icon">📦</span>服务
+    </div>
+    <div class="tab" onclick="switchPage('home')">
+      <span class="icon">👤</span>我的
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://127.0.0.1:3000/api';
+    let allCats = [], allProds = [];
+
+    async function init() {
+      try {
+        const cats = await fetch(API + '/categories').then(r => r.json());
+        allCats = cats.data || [];
+        renderHome();
+        renderProductPage();
+      } catch(e) {
+        document.getElementById('catGrid').innerHTML = '<div class="empty-state">⚠️ 后端未连接<br><small>请确认服务器已启动</small></div>';
+      }
+    }
+
+    function renderHome() {
+      // 分类网格
+      document.getElementById('catGrid').innerHTML = allCats.map(c => `
+        <div class="cat-card" onclick="switchPage('products');filterByCat(${c.id})">
+          <span class="ci">${c.icon||'📁'}</span>
+          <span class="cn">${c.name}</span>
+        </div>
+      `).join('');
+
+      // 热门产品
+      const prods = [];
+      allCats.forEach(c => { if(c.products) prods.push(...c.products); });
+      allProds = prods;
+      document.getElementById('hotProducts').innerHTML = prods.slice(0,4).map(p => productCard(p)).join('');
+    }
+
+    function productCard(p) {
+      return `<div class="product-card" onclick="openDetail(${p.id})">
+        <div class="cover">⚖️</div>
+        <div class="info">
+          <div class="pname">${p.name}</div>
+          <div class="psub">${p.subtitle||''}</div>
+          <div class="pprice"><span>¥</span>${(p.price/100).toFixed(0)}${p.originalPrice && p.originalPrice > p.price ? `<span class="poriginal">¥${(p.originalPrice/100).toFixed(0)}</span>` : ''}</div>
+        </div>
+      </div>`;
+    }
+
+    function renderProductPage() {
+      // 分类tab
+      document.getElementById('catTabs').innerHTML = allCats.map(c =>
+        `<div class="cat-card" style="display:inline-block;padding:8px 16px;font-size:13px;cursor:pointer;white-space:nowrap;" onclick="filterByCat(${c.id})">${c.icon} ${c.name}</div>`
+      ).join('');
+      filterByCat(null);
+    }
+
+    function filterByCat(catId) {
+      const prods = catId ? allProds.filter(p => p.categoryId === catId) : allProds;
+      document.getElementById('productList').innerHTML = prods.map(p => productCard(p)).join('') || '<div class="empty-state">暂无产品</div>';
+    }
+
+    async function openDetail(id) {
+      try {
+        const data = await fetch(API + '/products/' + id).then(r => r.json());
+        const p = data.data;
+        if (!p) return;
+        document.getElementById('statusBar').textContent = p.name;
+
+        let casesHtml = '';
+        if (p.cases && p.cases.length) {
+          casesHtml = `<div class="card"><h4>🏆 真实案例</h4>${p.cases.map(c => `
+            <div class="case-item">
+              <div class="case-title">${c.title}</div>
+              <div class="case-desc">${c.desc}</div>
+              ${c.result ? `<div class="case-result">结果：${c.result}</div>` : ''}
+            </div>
+          `).join('')}</div>`;
+        }
+
+        document.getElementById('detailContent').innerHTML = `
+          <div class="detail-header">
+            <div class="dh-cover">⚖️</div>
+            <div class="dh-info">
+              <h3>${p.name}</h3>
+              <div class="dh-sub">${p.subtitle||''}</div>
+              <div class="dh-price">¥${(p.price/100).toFixed(0)}</div>
+            </div>
+          </div>
+          ${p.scenario ? `<div class="card"><h4>💡 你是否遇到这种情况？</h4><div class="scenario-text">${p.scenario}</div></div>` : ''}
+          ${p.roiHint ? `<div class="roi-card">💰 ${p.roiHint}</div>` : ''}
+          ${p.features && p.features.length ? `<div class="card"><h4>📋 服务内容</h4>${p.features.map(f => `<div class="feature-item">${f}</div>`).join('')}</div>` : ''}
+          ${p.process && p.process.length ? `<div class="card"><h4>🔄 服务流程</h4>${p.process.map((s,i) => `<div class="process-item"><div class="step-num">${s.step||i+1}</div><div><div class="step-title">${s.title}</div>${s.desc ? `<div class="step-desc">${s.desc}</div>` : ''}</div></div>`).join('')}</div>` : ''}
+          ${casesHtml}
+          ${p.guarantee ? `<div class="card"><div class="guarantee-text">🛡️ ${p.guarantee}</div></div>` : ''}
+          <div style="height:80px"></div>
+          <div class="bottom-bar">
+            <div class="bprice">¥${(p.price/100).toFixed(0)}</div>
+            <button class="bbtn" onclick="alert('这是预览模式，请在微信小程序中实际购买')">立即获取</button>
+          </div>`;
+        switchPage('detail');
+      } catch(e) {
+        alert('加载失败: ' + e.message);
+      }
+    }
+
+    function goBack() { switchPage('products'); }
+
+    function switchPage(name) {
+      document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+      document.getElementById('page-' + name).classList.add('active');
+      document.querySelectorAll('.tabbar .tab').forEach(el => el.classList.remove('active'));
+      if (name === 'home' || name === 'products') {
+        document.querySelectorAll('.tabbar .tab')[name === 'home' ? 0 : 1].classList.add('active');
+        document.getElementById('statusBar').textContent = '⚖️ 法律助手 — 小程序预览';
+      }
+      window.scrollTo(0, 0);
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 // API 基础配置
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = 'http://127.0.0.1:3000/api';
 
 // 获取存储的 token
 function getToken() {

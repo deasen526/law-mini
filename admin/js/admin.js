@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000/api/admin';
+const API_BASE = 'http://127.0.0.1:3000/api/admin';
 
 // ========== 认证检查 ==========
 const token = localStorage.getItem('admin_token');
