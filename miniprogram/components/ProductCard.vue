@@ -1,8 +1,8 @@
 <template>
   <view class="product-card" @click="goDetail">
-    <image v-if="product.coverImage" :src="imageBase + product.coverImage" mode="aspectFill" class="cover" />
-    <view v-else class="cover-placeholder">
-      <text class="placeholder-icon">⚖️</text>
+    <image v-if="product.coverImage" :src="product.coverImage" mode="aspectFill" class="cover" />
+    <view v-else class="cover-placeholder" :style="{ background: categoryGradient }">
+      <text class="placeholder-icon">{{ categorySymbol }}</text>
     </view>
 
     <view class="info">
@@ -24,15 +24,35 @@
   </view>
 </template>
 
-<script setup>
-const props = defineProps({
-  product: { type: Object, required: true },
-  imageBase: { type: String, default: '' },
-});
+<script>
+// 分类渐变及符号映射
+var CATEGORY_STYLES = {
+  1: { gradient: 'linear-gradient(135deg, #1a6fb5, #42a5f5)', symbol: '§' },   // 劳动维权 - 蓝色
+  2: { gradient: 'linear-gradient(135deg, #ff9800, #ffb74d)', symbol: '⌂' },   // 租房纠纷 - 橙色
+  3: { gradient: 'linear-gradient(135deg, #4caf50, #81c784)', symbol: '¶' },   // 法律文书 - 绿色
+  4: { gradient: 'linear-gradient(135deg, #7b1fa2, #ba68c8)', symbol: '★' },   // 年度服务 - 紫色
+};
 
-function goDetail() {
-  uni.navigateTo({ url: `/pages/product-detail/detail?id=${props.product.id}` });
-}
+export default {
+  props: {
+    product: { type: Object, required: true },
+  },
+  computed: {
+    categoryGradient: function () {
+      var catId = this.product.categoryId;
+      return (CATEGORY_STYLES[catId] || CATEGORY_STYLES[1]).gradient;
+    },
+    categorySymbol: function () {
+      var catId = this.product.categoryId;
+      return (CATEGORY_STYLES[catId] || CATEGORY_STYLES[1]).symbol;
+    },
+  },
+  methods: {
+    goDetail: function () {
+      uni.navigateTo({ url: '/pages/product-detail/detail?id=' + this.product.id });
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -44,6 +64,12 @@ function goDetail() {
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: row;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.product-card:active {
+  transform: scale(0.98);
+  opacity: 0.9;
 }
 
 .cover {
@@ -57,14 +83,15 @@ function goDetail() {
   width: 200rpx;
   height: 200rpx;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .placeholder-icon {
-  font-size: 64rpx;
+  font-size: 72rpx;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: Georgia, 'Times New Roman', serif;
 }
 
 .info {
